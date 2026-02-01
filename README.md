@@ -1,4 +1,4 @@
-# Jozu Labs: Agentic Data Insights 🧠📊
+# Jozu: Agentic Data Insights 🧠📊
 
 Jozu is an **agentic data analytics system** built with LangGraph and LLMs.
 It automatically transforms CSV/XLSX/Parquet/JSON datasets into **structured, evidence-backed insights**
@@ -52,6 +52,9 @@ Jozu bridges the gap by combining:
 <img width="1547" height="836" alt="image" src="https://github.com/user-attachments/assets/a6e9039a-1dd7-4aef-8ac9-28824a8e8bac" />
 <img width="1456" height="818" alt="image" src="https://github.com/user-attachments/assets/ae36fdcb-e59b-4ba8-9735-2dbf307a0eef" />
 <img width="1453" height="698" alt="image" src="https://github.com/user-attachments/assets/5b53c9e5-9899-46c8-8d48-1abd901a5f07" />
+
+## Status: 
+- Active personal R&D project (iterative development)
 
 ## Setup
 ```bash
