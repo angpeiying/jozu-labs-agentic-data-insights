@@ -53,9 +53,6 @@ Jozu bridges the gap by combining:
 <img width="1456" height="818" alt="image" src="https://github.com/user-attachments/assets/ae36fdcb-e59b-4ba8-9735-2dbf307a0eef" />
 <img width="1453" height="698" alt="image" src="https://github.com/user-attachments/assets/5b53c9e5-9899-46c8-8d48-1abd901a5f07" />
 
-## 📄 License
-MIT
-
 ## Setup
 ```bash
 python -m venv .venv
@@ -71,4 +68,5 @@ cp .env.example .env
 ## Run
 
 uvicorn tools.main:app --reload 
+
 
