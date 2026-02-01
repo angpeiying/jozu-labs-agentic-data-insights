@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jozu Labs</title>
+
+  <link rel="stylesheet" href="/static/styles.css" />
+
+  <!-- Vega-Lite -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">Jozu Labs</div>
+        <div class="subtitle">Upload your data. Let intelligent agents analyze, reason, and generate actionable insights.</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <!-- <span class="pill" id="appStatus">ready</span> -->
+
+      <button class="btn ghost" id="dlMdBtn" disabled>Export MD</button>
+      <button class="btn ghost" id="dlPdfBtn" disabled>Export PDF</button>
+      <button class="btn ghost" id="shareBtn" disabled>Copy Share Link</button>
+      <button id="themeToggle" class="ghost-btn" aria-label="Toggle theme">🌙 Dark</button>
+    </div>
+  </header>
+
+  <main class="container grid">
+    <!-- LEFT: Upload + Results -->
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>Upload your dataset</h2>
+          <p class="muted">Drag & drop a <b>.csv</b>/<b>.xlsx</b>/<b>.parquet</b>/<b>.json</b>, or click to browse.</p>
+        </div>
+
+        <label class="toggle">
+          <input id="compareToggle" type="checkbox" />
+          <span>Compare mode</span>
+        </label>
+      </div>
+
+      <!-- File A -->
+      <div id="dropzone" class="dropzone">
+        <!-- <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" /> -->
+         <input id="fileInput" type="file" accept=".csv,.xlsx,.xls,.parquet,.jsonl,.ndjson" />
+        <div class="dz-text">
+          <div class="dz-title">Dataset A</div>
+          <div class="dz-sub">Drop file here or click to browse</div>
+        </div>
+      </div>
+
+      <!-- <div class="row">
+        <button id="uploadBtn" class="btn" disabled>Generate Insights</button>
+        <div id="status" class="status muted">No file selected</div>
+      </div> -->
+      <div class="row status-row">
+        <button id="uploadBtn" class="btn" disabled>Generate Insights</button>
+        <div id="status" class="status muted">No file selected</div>
+        <div id="runSummary" class="run-summary">—</div>
+      </div>
+
+
+      <!-- File B (Compare) -->
+      <div id="dropzoneBWrap" class="hidden" style="margin-top:14px;">
+        <div id="dropzoneB" class="dropzone">
+          <input id="fileInputB" type="file" accept=".csv,.xlsx,.xls" />
+          <div class="dz-text">
+            <div class="dz-title">Dataset B</div>
+            <div class="dz-sub">Drop file here or click to browse</div>
+          </div>
+        </div>
+        <div id="statusB" class="status muted" style="margin-top:8px;">No file selected</div>
+      </div>
+
+      <hr class="sep"/>
+
+      <!-- RESULTS HEADER -->
+      <div class="results-head">
+        <div>
+          <h2 style="margin-bottom:4px;">Results</h2>
+          <p class="muted" style="margin:0;">Overview → Insights → Charts. (Raw JSON is optional.)</p>
+        </div>
+        <div class="row" style="margin-top:0;">
+          <a id="profileLink" class="link hidden" target="_blank" rel="noopener">Open Profiling Report</a>
+          <button id="copyJsonBtn" class="btn ghost">Copy JSON</button>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="insights">Insights</button>
+        <button class="tab" data-tab="charts">Charts</button>
+        <button class="tab" data-tab="raw">Raw JSON</button>
+      </div>
+
+      <!-- OVERVIEW PANEL -->
+      <section id="tab-overview" class="tab-panel">
+        <div id="comparePanel" class="card-lite hidden" style="margin-bottom:12px;"></div>
+
+        <div class="overview-top">
+          <div>
+            <div class="h3">Dataset Summary</div>
+            <div id="overviewText" class="muted" style="margin-top:8px;">Upload a dataset to see overview.</div>
+          </div>
+          <span id="overviewPill" class="pill">—</span>
+        </div>
+
+        <div class="overview-grid">
+          <div class="metric">
+            <div id="rowCount" class="metric-value">—</div>
+            <div class="metric-label">Rows</div>
+          </div>
+          <div class="metric">
+            <div id="colCount" class="metric-value">—</div>
+            <div class="metric-label">Columns</div>
+          </div>
+          <div class="metric">
+            <div id="dupCount" class="metric-value">—</div>
+            <div class="metric-label">Duplicate rows</div>
+          </div>
+          <div class="metric">
+            <div id="insightCount" class="metric-value">—</div>
+            <div class="metric-label">Insights</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card-lite">
+            <div class="h4">Key risks</div>
+            <ul id="riskList" class="list"></ul>
+          </div>
+          <div class="card-lite">
+            <div class="h4">Key opportunities</div>
+            <ul id="oppList" class="list"></ul>
+          </div>
+        </div>
+
+        <div class="card-lite">
+          <div class="h4">Data quality notes</div>
+          <div id="dqNotes" class="dq-notes muted">—</div>
+        </div>
+      </section>
+
+      <!-- INSIGHTS PANEL -->
+      <section id="tab-insights" class="tab-panel hidden">
+        <div class="toolbar">
+          <div class="row" style="margin-top:0;">
+            <label class="muted">Severity</label>
+            <select id="severityFilter" class="select">
+              <option value="all">All</option>
+              <option value="risk">Risk</option>
+              <option value="warning">Warning</option>
+              <option value="opportunity">Opportunity</option>
+              <option value="info">Info</option>
+            </select>
+
+            <label class="muted" style="margin-left:10px;">Sort</label>
+            <select id="sortFilter" class="select">
+              <option value="confidence_desc">Confidence (high → low)</option>
+              <option value="confidence_asc">Confidence (low → high)</option>
+              <option value="severity">Severity</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="insightCards" class="insight-grid"></div>
+      </section>
+
+      <!-- CHARTS PANEL -->
+      <section id="tab-charts" class="tab-panel hidden">
+        <div class="muted" style="margin-bottom:12px;">
+          Interactive Vega-Lite charts generated from deterministic packs.
+        </div>
+
+        <div class="row" style="display:flex; gap:10px; align-items:center; margin:10px 0;">
+          <span class="muted">Filter:</span>
+          <select id="chartFilter" class="select">
+            <option value="all">All</option>
+            <option value="quality">Quality</option>
+            <option value="categorical">Categorical</option>
+            <option value="numeric">Numeric</option>
+            <option value="time">Time</option>
+          </select>
+        </div>
+
+        <div id="charts" class="charts-grid"></div>
+      </section>
+
+      <!-- RAW PANEL -->
+      <section id="tab-raw" class="tab-panel hidden">
+        <pre id="reportText" class="report">Upload a file to see raw JSON here.</pre>
+      </section>
+    </section>
+
+    <!-- RIGHT: Agent Run -->
+    <aside class="card side">
+      <div class="side-head">
+        <h2>Agents at Work</h2>
+        <span id="jobBadge" class="badge muted">idle</span>
+      </div>
+
+      <div class="prog">
+        <div id="progBar" class="prog-bar"></div>
+      </div>
+
+      <div id="steps" class="steps">
+        <div class="step muted">No job running.</div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Jozu Labs</span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
